@@ -10,11 +10,12 @@ import SpriteKit
 
 class Chip: SKSpriteNode {
     
-
+    
+    
 }
 
 class Pit: SKNode {
-    var chipsNode = SKNode()
+    
     var chips: [Chip] = []
     
     

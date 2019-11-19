@@ -32,6 +32,7 @@ class GameViewController: UIViewController {
                     view.presentScene(sceneNode)
                     view.showsFPS = true
                     view.showsNodeCount = true
+                    view.backgroundColor = .white
                 }
             }
         }
