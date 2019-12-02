@@ -23,23 +23,10 @@ class GameScene: SKScene {
     let label1 = SKLabelNode()
     let label2 = SKLabelNode()
     var playerOutline = SKShapeNode()
+    var bonusLabel = SKLabelNode()
+    var winner = 0
     var currentPlayer = 1
-    var pitAcross0 = Pit()
-    var pitAcross1 = Pit()
-    var pitAcross2 = Pit()
-    var pitAcross3 = Pit()
-    var pitAcross4 = Pit()
-    var pitAcross5 = Pit()
-    var pitAcross7 = Pit()
-    var pitAcross8 = Pit()
-    var pitAcross9 = Pit()
-    var pitAcross10 = Pit()
-    var pitAcross11 = Pit()
-    var pitAcross12 = Pit()
     
-    
-    
-
     override func sceneDidLoad() {
         setUpGameBoard()
         
@@ -55,6 +42,7 @@ class GameScene: SKScene {
         label1.fontName = "HelveticaNeue-Bold"
         label1.fontColor = .red
         self.addChild(label1)
+        
     }
     
     func adjustScore2(by points: Int) {
@@ -67,18 +55,66 @@ class GameScene: SKScene {
         label2.fontName = "HelveticaNeue-Bold"
         label2.fontColor = .red
         self.addChild(label2)
+        
     }
 
+    func bonusLabelSequence(text: String) -> SKAction {
+        
+        let changeText = SKAction.run {
+            self.bonusLabel.text = text
+        }
+        return SKAction.sequence([SKAction.fadeIn(withDuration: 2), changeText, SKAction.wait(forDuration: 3.5), SKAction.fadeOut(withDuration: 2)])
+        
+    }
+    
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches {
             touchLocation = touch.location(in: gameBoard)
             
+            
+            
             if let currentPit = ((gameBoard.atPoint(touchLocation).parent) ?? pits[0]) as? Pit {
+                
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    self.checkWinner()
+                }
                 
                 playerActions(currentPit)
                 
                 
+                
             }
+        }
+    }
+    
+    
+    
+    func checkWinner() {
+        if ((pits[0].chips.count == 0) && (pits[1].chips.count == 0) && (pits[2].chips.count == 0) && (pits[3].chips.count == 0) && (pits[4].chips.count == 0) && (pits[5].chips.count == 0)) {
+
+            for v in 7..<13 {
+                for z in 0..<pits[v].chips.count {
+                    let chip = pits[v].chips[z]
+                    let parent = chip.parent as! Pit
+                    moveChip(currentChip: chip, chipParent: parent, pitAfterClick: pits[13], targetPoint: pits[13].position)
+                    adjustScore1(by: 1)
+                }
+            }
+            
+            
+        } else if ((pits[7].chips.count == 0) && (pits[8].chips.count == 0) && (pits[9].chips.count == 0) && (pits[10].chips.count == 0) && (pits[11].chips.count == 0) && (pits[12].chips.count == 0)) {
+            for v in 0..<6 {
+                for z in 0..<pits[v].chips.count {
+                    let chip = pits[v].chips[z]
+                    let parent = chip.parent as! Pit
+                    moveChip(currentChip: chip, chipParent: parent, pitAfterClick: pits[6], targetPoint: pits[6].position)
+                    adjustScore2(by: 1)
+                }
+                    
+            }
+                
+            
         }
     }
     
@@ -86,11 +122,7 @@ class GameScene: SKScene {
         
         let ogChipPosition = chipParent.position
         let ogChipScale = chipParent.xScale
-        
-        
-        
-        
-        
+
         let addChildAction = SKAction.run {
             chipParent.removeAllChildren()
             chipParent.chips.removeAll()
@@ -110,12 +142,14 @@ class GameScene: SKScene {
         }
         
         let changeChipPosition = SKAction.run {
-            let randomX = (CGFloat.random(in: -30...30))
-            let randomY = (CGFloat.random(in: -30...30))
+            let randomX = (CGFloat.random(in: -35...35))
+            let randomY = (CGFloat.random(in: -35...35))
             
             currentChip.run(SKAction.moveBy(x: randomX, y: randomY, duration: 0.2))
             
         }
+        
+        
         let moveAction = SKAction.move(to: targetPoint, duration: 0.5)
         
         let sequence = SKAction.sequence([addChildAction, moveAction, addChipToPit, changeChipPosition, SKAction.scale(to: 0.81, duration: 1)])
@@ -155,26 +189,57 @@ class GameScene: SKScene {
                                 if pitAfterClick == pits[13] {
                                     adjustScore1(by: 1)
                                 } else if pitAfterClick == pits[6] {
-                                    if currentPit.chips.count < 12 {
-                                        pitAfterClick = pits[7]
-                                        y += 1
-                                    } else if currentPit.chips.count > 12 {
-                                        pitAfterClick = pits[8]
-                                        y += 2
-                                    }
-                                    
+                                    pitAfterClick = pits[7]
+                                    y += 1
                                 }
                                 
                                 let currentChip = pits[i].chips[z]
                                 let chipParent = currentChip.parent as! Pit
                                 let targetPoint = pitAfterClick.position
                                 
-                                moveChip(currentChip: currentChip, chipParent: chipParent, pitAfterClick: pitAfterClick, targetPoint: targetPoint)
+                                var pitAcrossLastChipPit = Pit()
+                               
+                                if (i+(z+y)) > 26 {
+                                   pitAcrossLastChipPit = pitsAcross[(i+(z+y)) - 27]
+                                } else if (i+(z+y)) > 13 {
+                                   pitAcrossLastChipPit = pitsAcross[(i+(z+y)) - 14]
+                                } else {
+                                   pitAcrossLastChipPit = pitsAcross[i+(z+y)]
+                                }
+                                
+                                if (pitAfterClick == pits[7] || pitAfterClick == pits[8] || pitAfterClick == pits[9] || pitAfterClick == pits[10] || pitAfterClick == pits[11] || pitAfterClick == pits[12]) && ((z == (currentPit.chips.count - 1)) && (pitAfterClick.chips.count == 0) && (pitAcrossLastChipPit.chips.count >= 1)) {
+
+                                    
+                                    adjustScore1(by: 1)
+                                    moveChip(currentChip: currentChip, chipParent: chipParent, pitAfterClick: pits[13], targetPoint: pits[13].position)
+                                    bonusLabel.run(bonusLabelSequence(text: "Player 1 Stole Chips"))
+                                    
+                                    for x in 0..<pitAcrossLastChipPit.chips.count {
+                                        let currentChip2 = pitAcrossLastChipPit.chips[x]
+                                        
+                                        let chipParent2 = currentChip2.parent as! Pit
+                                        adjustScore1(by: 1)
+                                        
+                                        moveChip(currentChip: currentChip2, chipParent: chipParent2, pitAfterClick: pits[13], targetPoint: pits[13].position)
+                                        
+                                    }
+                                    
+                                } else {
+                                    moveChip(currentChip: currentChip, chipParent: chipParent, pitAfterClick: pitAfterClick, targetPoint: targetPoint)
+                                }
+                                
+                                if (pitAfterClick == pits[13]) && z == (currentPit.chips.count - 1) {
+                                    switchPlayer()
+                                    bonusLabel.run(bonusLabelSequence(text: "Player 1 Goes Again"))
+                                }
+                                
+                                
+                                
                             }
 
                         }
                     }
-                    
+                
                     switchPlayer()
                 }
             }
@@ -211,77 +276,55 @@ class GameScene: SKScene {
                                     pitAfterClick = pits[i+(z+y)]
                                 }
                                 
-                                if pitAfterClick == pits[13] {
-                                    if currentPit.chips.count < 12 {
-                                        pitAfterClick = pits[0]
-                                        y += 1
-                                    } else if currentPit.chips.count > 12 {
-                                        pitAfterClick = pits[1]
-                                        y += 2
-                                    }
-                                } else if pitAfterClick == pits[6] {
-                                    adjustScore2(by: 1  )
+                                if pitAfterClick == pits[6] {
+                                    adjustScore2(by: 1)
+                                } else if pitAfterClick == pits[13] {
+                                    pitAfterClick = pits[0]
+                                    y += 1
                                 }
                                     
                                 let currentChip = pits[i].chips[z]
                                 let chipParent = currentChip.parent as! Pit
                                 let targetPoint = pitAfterClick.position
                                 
-                                moveChip(currentChip: currentChip, chipParent: chipParent, pitAfterClick: pitAfterClick, targetPoint: targetPoint)
+                                var pitAcrossLastChipPit = Pit()
                                 
-                                if (pitAfterClick == pits[0] || pitAfterClick == pits[1] || pitAfterClick == pits[2] || pitAfterClick == pits[3] || pitAfterClick == pits[4] || pitAfterClick == pits[5]) && ((z == (currentPit.chips.count - 1)) && (pitAfterClick.chips.count == 0)) {
+                                if (i+(z+y)) > 26 {
+                                    pitAcrossLastChipPit = pitsAcross[(i+(z+y)) - 27]
+                                } else if (i+(z+y)) > 13 {
+                                    pitAcrossLastChipPit = pitsAcross[(i+(z+y)) - 14]
+                                } else {
+                                    pitAcrossLastChipPit = pitsAcross[i+(z+y)]
+                                }
+                                
+                                if (pitAfterClick == pits[0] || pitAfterClick == pits[1] || pitAfterClick == pits[2] || pitAfterClick == pits[3] || pitAfterClick == pits[4] || pitAfterClick == pits[5]) && ((z == (currentPit.chips.count - 1)) && (pitAfterClick.chips.count == 0) && (pitAcrossLastChipPit.chips.count >= 1)) {
                                     
-
-                                    var pitAcrossLastChipPit = Pit()
+                                    adjustScore2(by: 1)
+                                    moveChip(currentChip: currentChip, chipParent: chipParent, pitAfterClick: pits[6], targetPoint: pits[6].position)
+                                    bonusLabel.run(bonusLabelSequence(text: "Player 2 Stole Chips"))
                                     
-                                    if (i+(z+y)) > 26 {
-                                        pitAcrossLastChipPit = pitsAcross[(i+(z+y)) - 27]
-                                    } else if (i+(z+y)) > 13 {
-                                        pitAcrossLastChipPit = pitsAcross[(i+(z+y)) - 14]
-                                    } else {
-                                        pitAcrossLastChipPit = pitsAcross[i+(z+y)]
-                                    }
                                     
                                     for x in 0..<pitAcrossLastChipPit.chips.count {
                                         let currentChip2 = pitAcrossLastChipPit.chips[x]
-                                        let ogChipPosition2 = pitAcrossLastChipPit.position
-                                        let chipParent = pitAcrossLastChipPit
+                                        
+                                        let chipParent2 = pitAcrossLastChipPit
                                         adjustScore2(by: 1)
                                         
-                                        let addChildAction2 = SKAction.run {
-                                            pitAcrossLastChipPit.removeAllChildren()
-                                            pitAcrossLastChipPit.chips.removeAll()
-                                            self.gameBoard.addChild(currentChip2)
-                                            currentChip2.position = ogChipPosition2
-                                            currentChip2.setScale(0.238)
-                                        }
-                                        let addChipToEndzone = SKAction.run {
-                                            currentChip2.removeFromParent()
-                                            self.pits[6].addChild(currentChip2)
-                                            self.pits[6].chips.append(currentChip2)
-                                            currentChip2.setScale(1)
-                                            currentChip2.position = CGPoint.zero
-                                        }
-                                        let changeChipPosition2 = SKAction.run {
-                                            let randomX = (CGFloat.random(in: -30...30))
-                                            let randomY = (CGFloat.random(in: -30...30))
-                                            
-                                            currentChip2.run(SKAction.moveBy(x: randomX, y: randomY, duration: 0.2))
-                                            
-                                        }
-                                        let moveAction2 = SKAction.move(to: pits[6].position, duration: 0.5)
+                                        moveChip(currentChip: currentChip2, chipParent: chipParent2, pitAfterClick: pits[6], targetPoint: pits[6].position)
                                         
-                                        let sequence2 = SKAction.sequence([addChildAction2, moveAction2, addChipToEndzone, changeChipPosition2, SKAction.scale(to: 0.81, duration: 1)])
-                                        currentChip2.run(sequence2)
                                     }
                                     
-                                    
-                                    
-                                    
+                                }  else {
+                                    moveChip(currentChip: currentChip, chipParent: chipParent, pitAfterClick: pitAfterClick, targetPoint: targetPoint)
                                 }
                                 
                                 
                                 
+                                if (pitAfterClick == pits[6]) && z == (currentPit.chips.count - 1) {
+                                    switchPlayer()
+                                    bonusLabel.run(bonusLabelSequence(text: "Player 2 Goes Again"))
+                                    
+                                }
                             
 
                             
@@ -309,6 +352,7 @@ class GameScene: SKScene {
             currentPlayer = 1
             playerOutline.run(SKAction.move(to: CGPoint(x: -688.166, y: 274.518), duration: 0.3))
         }
+        
     }
     
     func setUpGameBoard() {
@@ -319,12 +363,10 @@ class GameScene: SKScene {
             pits[i] = (childNode(withName: "gameBoard")?.childNode(withName: "pit\(i)"))! as! Pit
             
             pits[i].chips = pits[i].children as! [Chip]
-            
-            
-            
-            
+
         }
-        
+        bonusLabel = childNode(withName: "bonus") as! SKLabelNode
+        bonusLabel.text = ""
         playerOutline = childNode(withName: "playerOutline") as! SKShapeNode
         
         pitsAcross[0] = pits[12]
