@@ -15,6 +15,7 @@ import GameplayKit
 class GameScene: SKScene {
     
     var touchLocation = CGPoint()
+    var touchPlace = CGPoint()
     var gameBoard = SKNode()
     var pits: Array<Pit> = Array(repeating: Pit(), count: 14)
     var pitsAcross: Array<Pit> = Array(repeating: Pit(), count: 14)
@@ -26,10 +27,11 @@ class GameScene: SKScene {
     var bonusLabel = SKLabelNode()
     var winner = 0
     var currentPlayer = 1
+    var resetButton = SKNode()
     
     override func sceneDidLoad() {
         setUpGameBoard()
-        
+       
     }
     
     func adjustScore1(by points: Int) {
@@ -61,34 +63,53 @@ class GameScene: SKScene {
     func bonusLabelSequence(text: String) -> SKAction {
         
         let changeText = SKAction.run {
+            
             self.bonusLabel.text = text
         }
-        return SKAction.sequence([SKAction.fadeIn(withDuration: 2), changeText, SKAction.wait(forDuration: 3.5), SKAction.fadeOut(withDuration: 2)])
+        return SKAction.sequence([changeText, SKAction.fadeIn(withDuration: 0.5), SKAction.wait(forDuration: 1.5), SKAction.fadeOut(withDuration: 0.5)])
+        
+    }
+    
+    func bonusLabelWinSequence(text: String) -> SKAction {
+        
+        let changeText = SKAction.run {
+            
+            self.bonusLabel.text = text
+        }
+        return SKAction.sequence([changeText, SKAction.fadeIn(withDuration: 0.5), SKAction.wait(forDuration: 10)])
         
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches {
             touchLocation = touch.location(in: gameBoard)
-            
-            
-            
+            touchPlace = touch.location(in: self)
+
             if let currentPit = ((gameBoard.atPoint(touchLocation).parent) ?? pits[0]) as? Pit {
-                
-                
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     self.checkWinner()
                 }
                 
                 playerActions(currentPit)
-                
-                
-                
+
             }
+            if (self.atPoint(touchPlace) == resetButton) {
+                masterView.isOver = true
+                print("pressed")
+            }
+            
+            
+            
         }
     }
     
-    
+    func checkScore() {
+        if score2 > score1 {
+            bonusLabel.run(bonusLabelWinSequence(text: "Player 2 Wins!!"))
+        } else if score1 > score2 {
+            bonusLabel.run(bonusLabelWinSequence(text: "Player 1 Wins!!"))
+        }
+    }
     
     func checkWinner() {
         if ((pits[0].chips.count == 0) && (pits[1].chips.count == 0) && (pits[2].chips.count == 0) && (pits[3].chips.count == 0) && (pits[4].chips.count == 0) && (pits[5].chips.count == 0)) {
@@ -102,6 +123,8 @@ class GameScene: SKScene {
                 }
             }
             
+            checkScore()
+            
             
         } else if ((pits[7].chips.count == 0) && (pits[8].chips.count == 0) && (pits[9].chips.count == 0) && (pits[10].chips.count == 0) && (pits[11].chips.count == 0) && (pits[12].chips.count == 0)) {
             for v in 0..<6 {
@@ -113,7 +136,8 @@ class GameScene: SKScene {
                 }
                     
             }
-                
+            
+            checkScore()
             
         }
     }
@@ -150,10 +174,21 @@ class GameScene: SKScene {
         }
         
         
+        
+//        let checkForStrays = SKAction.run {
+//            if pitAcrossLastChipPit.chips.count != 0  {
+//                let moveAction2 = SKAction.move(to: targetPoint, duration: 0.5)
+//
+//                let sequence2 = SKAction.sequence([addChildAction, moveAction2, addChipToPit, changeChipPosition, SKAction.scale(to: 0.81, duration: 1)])
+//                currentChip.run(sequence2)
+//            }
+//        }
+        
         let moveAction = SKAction.move(to: targetPoint, duration: 0.5)
         
         let sequence = SKAction.sequence([addChildAction, moveAction, addChipToPit, changeChipPosition, SKAction.scale(to: 0.81, duration: 1)])
         currentChip.run(sequence)
+        
     }
     
     func playerActions(_ currentPit: Pit) {
@@ -222,7 +257,12 @@ class GameScene: SKScene {
                                         
                                         moveChip(currentChip: currentChip2, chipParent: chipParent2, pitAfterClick: pits[13], targetPoint: pits[13].position)
                                         
+                                        
+                                        
                                     }
+                                    
+                                    
+                                    
                                     
                                 } else {
                                     moveChip(currentChip: currentChip, chipParent: chipParent, pitAfterClick: pitAfterClick, targetPoint: targetPoint)
@@ -366,8 +406,9 @@ class GameScene: SKScene {
 
         }
         bonusLabel = childNode(withName: "bonus") as! SKLabelNode
-        bonusLabel.text = ""
+        bonusLabel.run(SKAction.fadeOut(withDuration: 0))
         playerOutline = childNode(withName: "playerOutline") as! SKShapeNode
+        resetButton = childNode(withName: "reset") as! SKSpriteNode
         
         pitsAcross[0] = pits[12]
         pitsAcross[1] = pits[11]
