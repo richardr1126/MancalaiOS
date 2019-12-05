@@ -294,7 +294,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = V3R4BHR83N;
+				DEVELOPMENT_TEAM = 454D2M87C9;
 				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = MancalaGame/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -302,8 +302,9 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = HACS.MancalaGame;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				MARKETING_VERSION = 0.9.1;
+				PRODUCT_BUNDLE_IDENTIFIER = HACS.MancalaGame2;
+				PRODUCT_NAME = MancalaGame;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -315,7 +316,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = V3R4BHR83N;
+				DEVELOPMENT_TEAM = 454D2M87C9;
 				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = MancalaGame/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -323,8 +324,9 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = HACS.MancalaGame;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				MARKETING_VERSION = 0.9.1;
+				PRODUCT_BUNDLE_IDENTIFIER = HACS.MancalaGame2;
+				PRODUCT_NAME = MancalaGame;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

@@ -19,6 +19,7 @@ class GameScene: SKScene {
     var gameBoard = SKNode()
     var pits: Array<Pit> = Array(repeating: Pit(), count: 14)
     var pitsAcross: Array<Pit> = Array(repeating: Pit(), count: 14)
+    var pitLabels: Array<SKLabelNode> = Array(repeating: SKLabelNode(), count: 13)
     var score1 = 0
     var score2 = 0
     let label1 = SKLabelNode()
@@ -173,7 +174,16 @@ class GameScene: SKScene {
             
         }
         
-        
+        let updateScore = SKAction.run {
+            for i in 0...12 {
+                if i == 0 || i == 1 || i == 2 || i == 3 || i == 4 || i == 5 {
+                    self.pitLabels[i].text = "\(self.pits[i].chips.count)"
+                } else if i == 7 || i == 8 || i == 9 || i == 10 || i == 11 || i == 12 {
+                    self.pitLabels[i].text = "\(self.pits[i].chips.count)"
+                }
+                
+            }
+        }
         
 //        let checkForStrays = SKAction.run {
 //            if pitAcrossLastChipPit.chips.count != 0  {
@@ -186,7 +196,7 @@ class GameScene: SKScene {
         
         let moveAction = SKAction.move(to: targetPoint, duration: 0.5)
         
-        let sequence = SKAction.sequence([addChildAction, moveAction, addChipToPit, changeChipPosition, SKAction.scale(to: 0.81, duration: 1)])
+        let sequence = SKAction.sequence([addChildAction, moveAction, addChipToPit, updateScore, changeChipPosition, SKAction.scale(to: 0.81, duration: 1)])
         currentChip.run(sequence)
         
     }
@@ -405,6 +415,17 @@ class GameScene: SKScene {
             pits[i].chips = pits[i].children as! [Chip]
 
         }
+        for i in 0...12 {
+            
+            if i == 0 || i == 1 || i == 2 || i == 3 || i == 4 || i == 5 {
+                pitLabels[i] = childNode(withName: "pit\(i)Label") as! SKLabelNode
+            } else if i == 7 || i == 8 || i == 9 || i == 10 || i == 11 || i == 12 {
+                pitLabels[i] = childNode(withName: "pit\(i)Label") as! SKLabelNode
+            }
+                
+            
+        }
+        
         bonusLabel = childNode(withName: "bonus") as! SKLabelNode
         bonusLabel.run(SKAction.fadeOut(withDuration: 0))
         playerOutline = childNode(withName: "playerOutline") as! SKShapeNode
